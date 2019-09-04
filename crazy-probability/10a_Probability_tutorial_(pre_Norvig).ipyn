@@ -1,0 +1,323 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "10a_Probability tutorial 1 (pre-Norvig).ipynb",
+      "version": "0.3.2",
+      "provenance": [],
+      "collapsed_sections": []
+    },
+    "kernelspec": {
+      "display_name": "Python 3",
+      "language": "python",
+      "name": "python3"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "colab_type": "text",
+        "id": "K8B16_HV-xak"
+      },
+      "source": [
+        "# Probability\n",
+        "\n",
+        "You're about to embark on an interesting, and very important, journey into the world of probability. The concepts you're going to learn about are really fundamental to data science, so you'll want to pay attention and make sure you lay the foundation correctly.\n",
+        "\n",
+        "Our philosophy at the Explore Data Science Academy is to mix content we've created ourselves with the best of what else is out there. As an introduction to probability, you really can't do better than the Jupyter Notebook put together by Peter Norvig, which is your next stop on this journey; we've also put together a couple of Google Sheets that provide an intuitive introduction to the subject of probability, which we recommend you start with before going on to the Norvig tutorial.\n",
+        "\n",
+        "Norvig's notebooks make use of Python code to illustrate the concepts, and we know that most of you are still very early in your Python journey, and digging deeper into coding is the subject of the next sprint. But it is definitely possible to follow the logic of the argument without necessarily understanding all of the Python code. So here's how we want you to approach this:\n",
+        "\n",
+        "1. Work through all of the argumemts that Norvig makes in plain text.\n",
+        "\n",
+        "2. Understand what he is going to try to achieve with a piece of Python code.\n",
+        "\n",
+        "3. Look at the output of the code, and make sure you can tie that back to the objective.\n",
+        "\n",
+        "4. Then, for fun, spend a bit of time looking at the code and seeing if you can make sense of how it achieves what it sets out to. This is a great way of learning the structure and some of the syntax of Python before we even get there in the curriculum.\n",
+        "\n",
+        "5. Don't get bogged down in the code, as long as you understand the gist of what is around the code.\n",
+        "\n",
+        "6. Ask for help when you need it!\n",
+        "\n",
+        "7. And most importantly:\n",
+        "\n",
+        "![Jacob Bernoulli](https://github.com/Explore-AI/Pictures/blob/master/dontpanic.png?raw=true)\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "colab_type": "text",
+        "id": "W2WoeVU9-xal"
+      },
+      "source": [
+        "Let's try that approach with reference to one of the pieces from the Norvig tutorial. \n",
+        "\n",
+        "\n",
+        "\n",
+        "# Urn Problems\n",
+        "\n",
+        "Around 1700, Jacob Bernoulli wrote about removing colored balls from an urn in his landmark treatise *[Ars Conjectandi](https://en.wikipedia.org/wiki/Ars_Conjectandi)*, and ever since then, explanations of probability have relied on [urn problems](https://www.google.com/webhp?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-8#q=probability%20ball%20urn). (You'd think the urns would be empty by now.) \n",
+        "\n",
+        "![Jacob Bernoulli](http://www2.stetson.edu/~efriedma/periodictable/jpg/Bernoulli-Jacob.jpg)\n",
+        "<center><a href=\"https://en.wikipedia.org/wiki/Jacob_Bernoulli\">Jacob Bernoulli</a><br>1700</center>\n",
+        "\n",
+        "For example, here is a three-part problem [adapted](http://mathforum.org/library/drmath/view/69151.html)  from mathforum.org:\n",
+        "\n",
+        "> An urn contains 23 balls: 8 white, 6 blue, and 9 red.  We select six balls at random (each possible selection is equally likely). What is the probability of each of these possible outcomes:\n",
+        "\n",
+        "> 1. all balls are red\n",
+        "2. 3 are blue, 2 are white, and 1 is red\n",
+        "3. exactly 4 balls are white\n",
+        "\n",
+        "So, an outcome is a set of 6 balls, and the sample space is the set of all possible 6 ball combinations. We'll solve each of the 3 parts using our `P` function, and also using basic arithmetic; that is, *counting*. Counting is a bit tricky because:\n",
+        "- We have multiple balls of the same color. \n",
+        "- An outcome is a *set* of balls, where order doesn't matter, not a *sequence*, where order matters.\n",
+        "\n",
+        "To account for the first issue, I'll have 8 different white balls labelled `'W1'` through `'W8'`, rather than having eight balls all labelled `'W'`.  That makes it clear that selecting `'W1'` is different from selecting `'W2'`.\n",
+        "\n",
+        "The second issue is handled automatically by the `P` function, but if I want to do calculations by hand, I will sometimes first count the number of *permutations* of balls, then get the number of *combinations* by dividing the number of permutations by *c*!, where *c* is the number of balls in a combination. For example, if I want to choose 2 white balls from the 8 available, there are 8 ways to choose a first white ball and 7 ways to choose a second, and therefore 8 &times; 7 = 56 permutations of two white balls. But there are only 56 / 2 = 28 combinations, because `(W1, W2)` is the same combination as `(W2, W1)`.\n",
+        "\n",
+        "We'll start by defining the contents of the urn:\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "colab_type": "text",
+        "id": "uDAiHc0n-xam"
+      },
+      "source": [
+        "### How are you doing so far?\n",
+        "\n",
+        "OK, this is the point at which Norvig turns to some code. But if you've understood the text so far, it should be clear that what he wants the code to do is to list the contents of the urn, with an identifying label for each of the balls (W1, W2, ..., W8, B1, ..., B6, R1, ..., R9).\n",
+        "\n",
+        "Let's take a look at how he does it.\n",
+        "\n",
+        "> NOTE: to run the code below, click anywhere in the block and then press `shift+enter`"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab_type": "code",
+        "id": "FqCGG5mA-xan",
+        "colab": {}
+      },
+      "source": [
+        "def cross(A, B):\n",
+        "    \"The set of ways of concatenating one item from collection A with one from B.\"\n",
+        "    return {a + b\n",
+        "            for a in A for b in B}"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab_type": "code",
+        "id": "eXKf8jTO-xat",
+        "colab": {}
+      },
+      "source": [
+        "urn = cross('W', '12345678') | cross('B', '123456') | cross('R', '123456789') "
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab_type": "code",
+        "id": "g7hXx4Vh-xav",
+        "outputId": "729547ab-3acf-4ba9-9042-ead85f622300",
+        "colab": {}
+      },
+      "source": [
+        "urn"
+      ],
+      "execution_count": 0,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "{'B1',\n",
+              " 'B2',\n",
+              " 'B3',\n",
+              " 'B4',\n",
+              " 'B5',\n",
+              " 'B6',\n",
+              " 'R1',\n",
+              " 'R2',\n",
+              " 'R3',\n",
+              " 'R4',\n",
+              " 'R5',\n",
+              " 'R6',\n",
+              " 'R7',\n",
+              " 'R8',\n",
+              " 'R9',\n",
+              " 'W1',\n",
+              " 'W2',\n",
+              " 'W3',\n",
+              " 'W4',\n",
+              " 'W5',\n",
+              " 'W6',\n",
+              " 'W7',\n",
+              " 'W8'}"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 3
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "colab_type": "text",
+        "id": "8aI5qmrj-xax"
+      },
+      "source": [
+        "OK, remember what we said earlier? Skip past the code and straight to the output. Is that something like what you were expecting? It should have been. So really you don't need to understand the Python code at all to be able to understand the logical flow of Norvig's tutorial. But as we said, it's a good opportunity to begin to understand what's going on in the Python code, so why don't we try a little deconstruction?\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "colab_type": "text",
+        "id": "Pd5XXk8X-xax"
+      },
+      "source": [
+        "Starting at the end, the command ```urn``` is giving a Python description to show the contents of the variable called ```urn```: this is what generates the output.\n",
+        "\n",
+        "It should be reasonably clear, if you've had any kind of programming background, that the line above this is where a value is assigned to ```urn```. Let's see if we can figure out what is going on by deconstructing that line a bit. First of all, it contains three expressions of the form ```cross(a,b)```: if you have some coding experience you may realise that this has the look of a function ```cross``` being applied to the parameters ```a``` and ```b```. And if we go back to the beginning, this is where the function is defined:\n",
+        "\n",
+        "```def``` is the Python command to define a function: what follows is the function name (```cross```) and in brackets, any parameters passed to the function. Just like a conventional mathematical function, a Python function takes these parameters as input and transforms them into a defined output. What appears after the command ```return``` is the output of the function. Basically what the code after ```return``` is saying is the following:\n",
+        "\n",
+        "Take two strings, ```A``` and ```B```. For each element of each (```a``` and ```b```), define a new string as the concatenation of ```a``` and ```b``` (in Python, + adds numerical elements together and concatenates strings), and then return a set consisting of all of these combinations.\n",
+        "\n",
+        "Let's see how that works:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab_type": "code",
+        "id": "6ZgJSHuz-xay",
+        "outputId": "d94c37c9-7efc-4b4d-cdf9-26ddc284bc68",
+        "colab": {}
+      },
+      "source": [
+        "cross('W', '12345678')"
+      ],
+      "execution_count": 0,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "{'W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8'}"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 4
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "colab_type": "text",
+        "id": "nVL06ejm-xa0"
+      },
+      "source": [
+        "As you can see, the output is a label for each of the white balls (all combinations of the letter 'W' with the numbers 1 to 8). What's not so easy to see is that this is a set in Python:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab_type": "code",
+        "id": "U06uyt_8-xa0",
+        "outputId": "983f9a3a-7dce-4664-e134-e5c2abc433a9",
+        "colab": {}
+      },
+      "source": [
+        "type(cross('W', '12345678'))"
+      ],
+      "execution_count": 0,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "set"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 5
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "colab_type": "text",
+        "id": "WWb4BEhX-xa2"
+      },
+      "source": [
+        "And we can then apply set operators: & means the intersection of two sets and | means the union. For example:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab_type": "code",
+        "id": "PP3K_EFA-xa3",
+        "outputId": "b09c511b-98e1-4af7-deab-e0aa3d9b6e57",
+        "colab": {}
+      },
+      "source": [
+        "X = {1, 2, 3}\n",
+        "Y = {3, 4, 5}\n",
+        "\n",
+        "print(X & Y)\n",
+        "print(X | Y)"
+      ],
+      "execution_count": 0,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "{3}\n",
+            "{1, 2, 3, 4, 5}\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "colab_type": "text",
+        "id": "ZV4aHuuA-xa5"
+      },
+      "source": [
+        "Here's the point of the whole exercise: the more of that you can understand, the better. But it's a waste of time to get hung up on any of the Python details at this point, provided you can understand the argument being made and see how the output of the Python code relates to the problem at hand.\n",
+        "\n",
+        "With that perspective firmly in place, let's proceed to work through the Norvig tutorial! But first, take a detour through the two Google Sheets (the first on probability, the second on randomness and simulation) to lay the foundation, and as an added bonus give you some exposure to working on Google Sheets (similar to Microsoft Excel)."
+      ]
+    }
+  ]
+}
